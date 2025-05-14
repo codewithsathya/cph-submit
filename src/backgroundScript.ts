@@ -1,47 +1,52 @@
 // This script is always running in the background once the extension is installed.
 import config from './config';
-import { CphSubmitResponse, CphEmptyResponse } from './types';
-import { handleSubmit } from './handleSubmit';
+import { CphSubmitResponse, CphEmptyResponse, CphCsesSubmitResponse } from './types';
+import { handleCsesSubmit, handleSubmit } from './handleSubmit';
 import log from './log';
 
-const mainLoop = async () => {
-    let cphResponse;
+const fetchCphResponse = async (): Promise<CphSubmitResponse | CphEmptyResponse | CphCsesSubmitResponse | null> => {
     try {
-        const headers = new Headers();
-        headers.append('cph-submit', 'true');
+        const headers = new Headers({ 'cph-submit': 'true' });
 
         const request = new Request(config.cphServerEndpoint.href, {
             method: 'GET',
             headers,
         });
 
-        cphResponse = await fetch(request);
+        const cphResponse = await fetch(request);
+
+        if (!cphResponse.ok) {
+            log('Error while fetching cph response', cphResponse);
+            return null;
+        }
+
+        return await cphResponse.json();
     } catch (err) {
         log('Error while fetching cph response', err);
-        return;
+        return null;
     }
+};
 
-    if (!cphResponse.ok) {
-        log('Error while fetching cph response', cphResponse);
-        return;
-    }
+const mainLoop = async () => {
+    const response = await fetchCphResponse();
+    if (!response) return;
 
-    const response: CphSubmitResponse | CphEmptyResponse =
-        await cphResponse.json();
-
-    if (response.empty) {
+    if ('empty' in response && response.empty) {
         log('Got empty valid response from CPH');
-
         return;
     }
 
     log('Got non-empty valid response from CPH');
-    handleSubmit(
-        response.problemName,
-        response.languageId,
-        response.sourceCode,
-        response.url,
-    );
+
+    const { url } = response;
+
+    if (url.includes("codeforces.com")) {
+        handleSubmit(response as CphSubmitResponse);
+    } else if (url.includes("cses.fi")) {
+        handleCsesSubmit(response as CphCsesSubmitResponse);
+    } else {
+        log('Unsupported platform URL:', url);
+    }
 };
 
 setInterval(mainLoop, config.loopTimeOut);

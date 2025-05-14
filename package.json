@@ -1,9 +1,9 @@
 {
-    "name": "cph-submit",
+    "name": "cph-submit-pro",
     "version": "1.0.0",
     "description": "",
     "main": "out/extension.js",
-    "author": "Divyanshu Agrawal",
+    "author": "Sathiya Seelan",
     "license": "MIT",
     "devDependencies": {
         "ts-loader": "^9.5.1",

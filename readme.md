@@ -1,7 +1,6 @@
-# ![ICON](icon-48.png) cph-submit
+# ![ICON](icon-48.png) cph-submit-pro
 
-Browser add on that enables Codeforces submit with
-[Competitive Programming Helper](https://github.com/agrawal-d/cph)
+Browser add on that enables Codeforces submit with [Codeforces VsCode Extension](https://github.com/codewithsathya/vscode-codeforces)
 
 Available for Firefox and Google Chrome.
 
@@ -11,7 +10,7 @@ Available for Firefox and Google Chrome.
 
 [Google Chrome](https://chromewebstore.google.com/detail/cph-submit/ekplnobooikgpdbobcciehbhcmlklgnc)
 
-Install the extension using the above links, and keep the browser window open when you want to submit from cph in VS Code.
+Install the extension using the above links, and keep the browser window open when you want to submit from Codeforces Pro in VS Code.
 
 ## Building
 
