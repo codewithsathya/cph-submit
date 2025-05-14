@@ -18,6 +18,6 @@
         "tsc-dev": "tsc --watch"
     },
     "dependencies": {
-        "@types/chrome": "^0.0.268"
+        "@types/chrome": "^0.0.322"
     }
 }

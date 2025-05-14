@@ -1,8 +1,8 @@
 {
-    "name": "CPH Submit",
-    "author": "agrawal-d@outlook.com",
-    "homepage_url": "https://github.com/agrawal-d/cph-submit",
-    "version": "1.4.0",
+    "name": "CPH Submit Pro",
+    "author": "codewithsathya@gmail.com",
+    "homepage_url": "https://github.com/codewithsathya/cph-submit",
+    "version": "1.0.0",
     "description": "Codeforces Submit add-on for Competitive Programming Helper.",
     "icons": {
         "48": "icon-48.png"

@@ -3,14 +3,22 @@ import config from './config';
 import { CphSubmitResponse, CphEmptyResponse, CphCsesSubmitResponse } from './types';
 import { handleCsesSubmit, handleSubmit } from './handleSubmit';
 import log from './log';
+import { CSES_STATUS_KEY } from './constants';
 
 const fetchCphResponse = async (): Promise<CphSubmitResponse | CphEmptyResponse | CphCsesSubmitResponse | null> => {
     try {
-        const headers = new Headers({ 'cph-submit': 'true' });
+        const headers = new Headers({ 'cph-submit': 'true', 'Content-Type': "application/json" });
+
+        const localData = await chrome.storage.local.get(CSES_STATUS_KEY);
+
+        const data = {
+            csesStatus: localData[CSES_STATUS_KEY]
+        }
 
         const request = new Request(config.cphServerEndpoint.href, {
-            method: 'GET',
+            method: 'POST',
             headers,
+            body: JSON.stringify(data)
         });
 
         const cphResponse = await fetch(request);

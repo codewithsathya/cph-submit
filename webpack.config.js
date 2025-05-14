@@ -4,6 +4,7 @@ module.exports = {
     entry: {
         backgroundScript: './src/backgroundScript.ts',
         injectedScript: './src/injectedScript.ts',
+        csesRetriever: './src/cses-retriever.ts',
     },
     output: {
         filename: '[name].js',
