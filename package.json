@@ -18,6 +18,8 @@
         "tsc-dev": "tsc --watch"
     },
     "dependencies": {
-        "@types/chrome": "^0.0.322"
+        "@types/chrome": "^0.0.322",
+        "@types/webextension-polyfill": "^0.12.3",
+        "webextension-polyfill": "^0.12.0"
     }
 }

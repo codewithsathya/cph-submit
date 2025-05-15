@@ -6,5 +6,19 @@
     "description": "Codeforces Submit add-on for Competitive Programming Helper.",
     "icons": {
         "48": "icon-48.png"
-    }
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://cses.fi/problemset",
+                "https://cses.fi/problemset/",
+                "https://cses.fi/problemset/list",
+                "https://cses.fi/problemset/list/"
+            ],
+            "js": [
+                "/dist/csesRetriever.js"
+            ],
+            "run_at": "document_idle"
+        }
+    ]
 }

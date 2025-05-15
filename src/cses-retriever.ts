@@ -1,5 +1,6 @@
 import { CSES_STATUS_KEY } from "./constants";
 import log from "./log";
+import browser from "webextension-polyfill";
 
 function run() {
     const els = document.getElementsByClassName("account")
@@ -33,7 +34,7 @@ function run() {
             csesStatus[taskId] = false;
         }
     }
-    chrome.storage.local.set({ [CSES_STATUS_KEY]: csesStatus })
+    browser.storage.local.set({ [CSES_STATUS_KEY]: csesStatus })
 }
 
 run();

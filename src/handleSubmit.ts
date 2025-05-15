@@ -1,4 +1,3 @@
-// Code run when background script detects there is a problem to submit
 import config from './config';
 import log from './log';
 
@@ -9,12 +8,12 @@ if (typeof browser !== 'undefined') {
 }
 
 export const isContestProblem = (problemUrl: string) => {
-    return problemUrl.indexOf('contest') !== -1;
+    return problemUrl.includes('contest');
 };
 
 export const getSubmitUrl = (problemUrl: string) => {
     const url = new URL(problemUrl);
-    if(problemUrl.indexOf("cses.fi") !== -1) {
+    if (problemUrl.includes('cses.fi')) {
         const taskId = url.pathname.split('/')[3];
         return `https://cses.fi/problemset/submit/${taskId}`;
     }
@@ -46,13 +45,16 @@ const injectScript = async (tabId: number) => {
         });
     } else {
         await chrome.scripting.executeScript({
-            target: { tabId, allFrames: true },
+            target: {
+                tabId,
+                allFrames: true,
+            },
             files: ['/dist/injectedScript.js'],
         });
     }
 };
 
-const openAndInject = async (url: string): Promise<chrome.tabs.Tab> => {
+const openNewTab = async (url: string): Promise<chrome.tabs.Tab> => {
     const tab = await chrome.tabs.create({ active: true, url });
     chrome.windows.update(tab.windowId, { focused: true });
     return tab;
@@ -63,7 +65,7 @@ const addNavigationListener = (url: string, tabId: number, filter: chrome.webNav
     chrome.webNavigation.onCommitted.addListener((args) => {
         if (args.tabId === tabId) {
             log('Our tab is navigating');
-            // Handle navigation changes if needed
+            // handle navigation
         }
     }, filter);
 };
@@ -81,7 +83,7 @@ export const handleSubmit = async ({
 
     log('isContestProblem', isContestProblem(url));
 
-    const tab = await openAndInject(getSubmitUrl(url));
+    const tab = await openNewTab(getSubmitUrl(url));
     const tabId = tab.id as number;
 
     await injectScript(tabId);
@@ -114,7 +116,7 @@ export const handleCsesSubmit = async ({
 
     log('isContestProblem', isContestProblem(url));
 
-    const tab = await openAndInject(getSubmitUrl(url));
+    const tab = await openNewTab(getSubmitUrl(url));
     const tabId = tab.id as number;
 
     await injectScript(tabId);

@@ -1,15 +1,13 @@
-// This script is always running in the background once the extension is installed.
 import config from './config';
 import { CphSubmitResponse, CphEmptyResponse, CphCsesSubmitResponse } from './types';
 import { handleCsesSubmit, handleSubmit } from './handleSubmit';
 import log from './log';
 import { CSES_STATUS_KEY } from './constants';
+import browser from "webextension-polyfill";
 
 const fetchCphResponse = async (): Promise<CphSubmitResponse | CphEmptyResponse | CphCsesSubmitResponse | null> => {
     try {
-        const headers = new Headers({ 'cph-submit': 'true', 'Content-Type': "application/json" });
-
-        const localData = await chrome.storage.local.get(CSES_STATUS_KEY);
+        const localData = await browser.storage.local.get(CSES_STATUS_KEY);
 
         const data = {
             csesStatus: localData[CSES_STATUS_KEY]
@@ -17,7 +15,7 @@ const fetchCphResponse = async (): Promise<CphSubmitResponse | CphEmptyResponse 
 
         const request = new Request(config.cphServerEndpoint.href, {
             method: 'POST',
-            headers,
+            headers: config.headers,
             body: JSON.stringify(data)
         });
 

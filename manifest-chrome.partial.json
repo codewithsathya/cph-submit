@@ -6,26 +6,11 @@
         "storage"
     ],
     "host_permissions": [
-        "http://localhost*",
         "https://codeforces.com/*",
         "https://cses.fi/*"
     ],
     "background": {
         "service_worker": "dist/backgroundScript.js",
         "type": "module"
-    },
-    "content_scripts": [
-        {
-            "matches": [
-                "https://cses.fi/problemset",
-                "https://cses.fi/problemset/",
-                "https://cses.fi/problemset/list",
-                "https://cses.fi/problemset/list/"
-            ],
-            "js": [
-                "/dist/csesRetriever.js"
-            ],
-            "run_at": "document_idle"
-        }
-    ]
+    }
 }
