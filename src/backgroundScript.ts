@@ -58,9 +58,13 @@ const fetchCphResponse = async (): Promise<CphSubmitResponse | CphEmptyResponse 
 let isRunning = false;
 
 const mainLoop = async () => {
-    if(isRunning) {
+    if (isRunning) {
+        console.log('mainLoop is already running. Skipping this run.');
         return;
     }
+
+    isRunning = true;
+
     const response = await fetchCphResponse();
     if (!response) return;
 
