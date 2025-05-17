@@ -3,7 +3,8 @@
     "permissions": [
         "scripting",
         "webNavigation",
-        "storage"
+        "storage",
+        "alarms"
     ],
     "host_permissions": [
         "https://codeforces.com/*",

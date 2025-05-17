@@ -3,11 +3,33 @@ import { CphSubmitResponse, CphEmptyResponse, CphCsesSubmitResponse } from './ty
 import { handleCsesSubmit, handleSubmit } from './handleSubmit';
 import log from './log';
 import { CSES_STATUS_KEY } from './constants';
-import browser from "webextension-polyfill";
+import webBrowser from "webextension-polyfill";
+
+declare const browser: any;
+
+if (typeof browser === 'undefined') {
+    chrome.runtime.onInstalled.addListener(() => {
+        chrome.alarms.create('checkCPH', {
+            periodInMinutes: config.loopTimeOut / 60000,
+        });
+    });
+
+    chrome.runtime.onStartup.addListener(() => {
+        chrome.alarms.create('checkCPH', {
+            periodInMinutes: config.loopTimeOut / 60000,
+        });
+    });
+
+    chrome.alarms.onAlarm.addListener((alarm) => {
+        if (alarm.name === 'checkCPH') {
+            mainLoop();
+        }
+    });
+}
 
 const fetchCphResponse = async (): Promise<CphSubmitResponse | CphEmptyResponse | CphCsesSubmitResponse | null> => {
     try {
-        const localData = await browser.storage.local.get(CSES_STATUS_KEY);
+        const localData = await webBrowser.storage.local.get(CSES_STATUS_KEY);
 
         const data = {
             csesStatus: localData[CSES_STATUS_KEY]
@@ -33,7 +55,12 @@ const fetchCphResponse = async (): Promise<CphSubmitResponse | CphEmptyResponse 
     }
 };
 
+let isRunning = false;
+
 const mainLoop = async () => {
+    if(isRunning) {
+        return;
+    }
     const response = await fetchCphResponse();
     if (!response) return;
 
