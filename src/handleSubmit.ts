@@ -1,4 +1,3 @@
-// Code run when background script detects there is a problem to submit
 import config from './config';
 import log from './log';
 
@@ -9,46 +8,39 @@ if (typeof browser !== 'undefined') {
 }
 
 export const isContestProblem = (problemUrl: string) => {
-    return problemUrl.indexOf('contest') != -1;
+    return problemUrl.includes('contest');
 };
 
 export const getSubmitUrl = (problemUrl: string) => {
+    const url = new URL(problemUrl);
+    if (problemUrl.includes('cses.fi')) {
+        const taskId = url.pathname.split('/')[3];
+        return `https://cses.fi/problemset/submit/${taskId}`;
+    }
     if (!isContestProblem(problemUrl)) {
         return config.cfSubmitPage.href;
     }
-    const url = new URL(problemUrl);
     const contestNumber = url.pathname.split('/')[2];
-    const submitURL = `https://codeforces.com/contest/${contestNumber}/submit`;
-    return submitURL;
+    return `https://codeforces.com/contest/${contestNumber}/submit`;
 };
 
-/** Opens the codefoces submit page and injects script to submit code. */
-export const handleSubmit = async (
-    problemName: string,
-    languageId: number,
-    sourceCode: string,
-    problemUrl: string,
-) => {
-    if (problemName === '' || languageId == -1 || sourceCode == '') {
-        log('Invalid arguments to handleSubmit');
-        return;
-    }
+interface BaseSubmitParams {
+    languageId: number | string;
+    sourceCode: string;
+    url: string;
+}
 
-    log('isContestProblem', isContestProblem(problemUrl));
+interface CodeforcesSubmitParams extends BaseSubmitParams {
+    problemName: string;
+}
 
-    let tab = await chrome.tabs.create({
-        active: true,
-        url: getSubmitUrl(problemUrl),
-    });
+interface CsesSubmitParams extends BaseSubmitParams {
+    fileName: string;
+}
 
-    const tabId = tab.id as number;
-
-    chrome.windows.update(tab.windowId, {
-        focused: true,
-    });
-
+const injectScript = async (tabId: number) => {
     if (typeof browser !== 'undefined') {
-        await browser.tabs.executeScript(tab.id, {
+        await browser.tabs.executeScript(tabId, {
             file: '/dist/injectedScript.js',
         });
     } else {
@@ -60,37 +52,86 @@ export const handleSubmit = async (
             files: ['/dist/injectedScript.js'],
         });
     }
+};
+
+const openNewTab = async (url: string): Promise<chrome.tabs.Tab> => {
+    const tab = await chrome.tabs.create({ active: true, url });
+    chrome.windows.update(tab.windowId, { focused: true });
+    return tab;
+};
+
+const addNavigationListener = (url: string, tabId: number, filter: chrome.webNavigation.WebNavigationEventFilter) => {
+    log('Adding nav listener');
+    chrome.webNavigation.onCommitted.addListener((args) => {
+        if (args.tabId === tabId) {
+            log('Our tab is navigating');
+            // handle navigation
+        }
+    }, filter);
+};
+
+export const handleSubmit = async ({
+    problemName,
+    languageId,
+    sourceCode,
+    url,
+}: CodeforcesSubmitParams) => {
+    if (!problemName || languageId === -1 || !sourceCode) {
+        log('Invalid arguments to handleSubmit');
+        return;
+    }
+
+    log('isContestProblem', isContestProblem(url));
+
+    const tab = await openNewTab(getSubmitUrl(url));
+    const tabId = tab.id as number;
+
+    await injectScript(tabId);
+
     chrome.tabs.sendMessage(tabId, {
         type: 'cph-submit',
         problemName,
         languageId,
         sourceCode,
-        url: problemUrl,
+        url,
     });
+
     log('Sending message to tab with script');
 
-    const filter = {
+    addNavigationListener(url, tabId, {
         url: [{ urlContains: 'codeforces.com/problemset/status' }],
-    };
+    });
+};
 
-    log('Adding nav listener');
+export const handleCsesSubmit = async ({
+    languageId,
+    sourceCode,
+    url,
+    fileName,
+}: CsesSubmitParams) => {
+    if (!languageId || !sourceCode) {
+        log('Invalid arguments to handleCsesSubmit');
+        return;
+    }
 
-    chrome.webNavigation.onCommitted.addListener((args) => {
-        log('Navigation about to happen');
+    log('isContestProblem', isContestProblem(url));
 
-        if (args.tabId === tab.id) {
-            log('Our tab is navigating');
+    const tab = await openNewTab(getSubmitUrl(url));
+    const tabId = tab.id as number;
 
-            // const url = new URL(args.url);
-            // const searchParams = new URLSearchParams(url.search);
+    await injectScript(tabId);
 
-            // if (searchParams.has("friends")) {
-            //   return;
-            // }
+    chrome.tabs.sendMessage(tabId, {
+        type: 'cph-cses-submit',
+        languageId,
+        sourceCode,
+        url,
+        fileName,
+    });
 
-            // log("Navigating to friends mode");
+    log('Sending message to tab with script');
 
-            // chrome.tabs.update(args.tabId, { url: args.url + "?friends=on" });
-        }
-    }, filter);
+    addNavigationListener(url, tabId, {
+        url: [{ urlContains: 'cses.fi/problemset/result' }],
+    });
 };

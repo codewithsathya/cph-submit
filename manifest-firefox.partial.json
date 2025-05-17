@@ -1,18 +1,21 @@
 {
     "manifest_version": 2,
-    "background": {
-        "scripts": ["dist/backgroundScript.js"]
-    },
     "permissions": [
         "scripting",
-        "*://localhost/*",
         "*://codeforces.com/*",
-        "webNavigation"
+        "*://cses.fi/*",
+        "webNavigation",
+        "storage"
     ],
+    "background": {
+        "scripts": [
+            "dist/backgroundScript.js"
+        ]
+    },
     "browser_specific_settings": {
         "gecko": {
-            "id": "{5dd8fd6e-0733-41a7-abc4-e19fba703de9}",
-            "strict_min_version": "49.0"
+            "id": "{20b75a32-7833-49b0-9b8c-360e8e04772a}",
+            "strict_min_version": "58.0"
         }
     }
 }

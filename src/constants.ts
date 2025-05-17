@@ -1,0 +1,1 @@
+export const CSES_STATUS_KEY = "cses-status-data"
