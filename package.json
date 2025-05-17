@@ -1,9 +1,9 @@
 {
-    "name": "cph-submit",
+    "name": "cph-auto-submit",
     "version": "1.0.0",
     "description": "",
     "main": "out/extension.js",
-    "author": "Divyanshu Agrawal",
+    "author": "Sathiya Seelan",
     "license": "MIT",
     "devDependencies": {
         "ts-loader": "^9.5.1",
@@ -18,6 +18,8 @@
         "tsc-dev": "tsc --watch"
     },
     "dependencies": {
-        "@types/chrome": "^0.0.268"
+        "@types/chrome": "^0.0.322",
+        "@types/webextension-polyfill": "^0.12.3",
+        "webextension-polyfill": "^0.12.0"
     }
 }
