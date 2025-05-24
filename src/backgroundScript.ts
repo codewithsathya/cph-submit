@@ -65,24 +65,28 @@ const mainLoop = async () => {
 
     isRunning = true;
 
-    const response = await fetchCphResponse();
-    if (!response) return;
+    try {
+        const response = await fetchCphResponse();
+        if (!response) return;
 
-    if ('empty' in response && response.empty) {
-        log('Got empty valid response from CPH');
-        return;
-    }
+        if ('empty' in response && response.empty) {
+            log('Got empty valid response from CPH');
+            return;
+        }
 
-    log('Got non-empty valid response from CPH');
+        log('Got non-empty valid response from CPH');
 
-    const { url } = response;
+        const { url } = response;
 
-    if (url.includes("codeforces.com")) {
-        handleSubmit(response as CphSubmitResponse);
-    } else if (url.includes("cses.fi")) {
-        handleCsesSubmit(response as CphCsesSubmitResponse);
-    } else {
-        log('Unsupported platform URL:', url);
+        if (url.includes("codeforces.com")) {
+            handleSubmit(response as CphSubmitResponse);
+        } else if (url.includes("cses.fi")) {
+            handleCsesSubmit(response as CphCsesSubmitResponse);
+        } else {
+            log('Unsupported platform URL:', url);
+        }
+    } finally {
+        isRunning = false;
     }
 };
 
