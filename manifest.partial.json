@@ -2,7 +2,7 @@
     "name": "CPH Submit Pro",
     "author": "codewithsathya@gmail.com",
     "homepage_url": "https://github.com/codewithsathya/cph-submit",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Codeforces Submit add-on for Competitive Programming Helper.",
     "icons": {
         "48": "icon-48.png"
