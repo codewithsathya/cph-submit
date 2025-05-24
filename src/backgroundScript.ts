@@ -10,19 +10,19 @@ declare const browser: any;
 if (typeof browser === 'undefined') {
     chrome.runtime.onInstalled.addListener(() => {
         chrome.alarms.create('checkCPH', {
-            periodInMinutes: config.loopTimeOut / 60000,
+            periodInMinutes: config.alarmInterval / 60000
         });
     });
 
     chrome.runtime.onStartup.addListener(() => {
         chrome.alarms.create('checkCPH', {
-            periodInMinutes: config.loopTimeOut / 60000,
+            periodInMinutes: config.alarmInterval / 60000
         });
     });
 
     chrome.alarms.onAlarm.addListener((alarm) => {
         if (alarm.name === 'checkCPH') {
-            mainLoop();
+            run();
         }
     });
 }
@@ -55,39 +55,36 @@ const fetchCphResponse = async (): Promise<CphSubmitResponse | CphEmptyResponse 
     }
 };
 
-let isRunning = false;
-
 const mainLoop = async () => {
-    if (isRunning) {
-        console.log('mainLoop is already running. Skipping this run.');
+    const response = await fetchCphResponse();
+    if (!response) return;
+
+    if ('empty' in response && response.empty) {
+        log('Got empty valid response from CPH');
         return;
     }
 
-    isRunning = true;
+    log('Got non-empty valid response from CPH');
 
-    try {
-        const response = await fetchCphResponse();
-        if (!response) return;
+    const { url } = response;
 
-        if ('empty' in response && response.empty) {
-            log('Got empty valid response from CPH');
-            return;
-        }
-
-        log('Got non-empty valid response from CPH');
-
-        const { url } = response;
-
-        if (url.includes("codeforces.com")) {
-            handleSubmit(response as CphSubmitResponse);
-        } else if (url.includes("cses.fi")) {
-            handleCsesSubmit(response as CphCsesSubmitResponse);
-        } else {
-            log('Unsupported platform URL:', url);
-        }
-    } finally {
-        isRunning = false;
+    if (url.includes("codeforces.com")) {
+        handleSubmit(response as CphSubmitResponse);
+    } else if (url.includes("cses.fi")) {
+        handleCsesSubmit(response as CphCsesSubmitResponse);
+    } else {
+        log('Unsupported platform URL:', url);
     }
 };
 
-setInterval(mainLoop, config.loopTimeOut);
+let interval: any;
+const run = () => {
+    console.log("Activated extension");
+    if(interval) {
+        console.log("Interval already running, so skipping")
+        return;
+    }
+    interval = setInterval(mainLoop, config.loopTimeOut);
+}
+
+run();
